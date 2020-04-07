@@ -9,7 +9,7 @@ var pos_y
 var new_pos
 var current_pos
 var old_pos = Vector2(8,8)
-var score
+var score = 0
 var child
 var win_text = "Dummy"
 var game_matrix
@@ -147,10 +147,11 @@ func _move_completed():
 		print (game_matrix)
 		_game_over()
 	score += 1
+
 	
 func _game_over():
-	get_tree().change_scene("GameOver.tscn")
-
+	get_tree().change_scene("Menu.tscn")
+	get_node("/root/Global").score = score
 
 # warning-ignore:unused_argument
 # warning-ignore:unused_argument
