@@ -1,16 +1,17 @@
 extends Node2D
 
-var score
+var score = 0
 var winners
-
+var advance = 0
 
 func _ready():
 	score = get_node("/root/Global").score
+	advance = get_node("/root/Global").advance
 	if score != 0: # the game is over
 		$MainMenu.visible = false
 		$HallPanel.visible = true
 		$NameInput.visible = true
-		$NameInput/CongratulationPanel/Label.text = get_node("/root/Global").win_text + " Score: " + var2str(score)
+		$NameInput/CongratulationPanel/Label.text = get_node("/root/Global").win_text + " Score: " + var2str(score) + " A: " + var2str(advance)
 		winners = _load_winners()
 	else: # appear as initial screen
 		$MainMenu.visible = true
@@ -37,15 +38,15 @@ func _on_TheHallOfGlory_pressed():
 	
 func _load():
 	var content_array_parsed = []
-	var content_array_proxy = []
+	var content_array_temp = []
 	var file = File.new()
 	file.open("res://save_game.dat", File.READ)
 	var content = file.get_as_text()
 	file.close()
 	var content_array = content.split ("\n", true, 0)
 	for row in range(content_array.size()):
-		content_array_proxy.append(content_array[row].split(" : ", false, 0))
-		content_array_parsed.append([content_array_proxy[row][0], str2var(content_array_proxy[row][1])])
+		content_array_temp.append(content_array[row].split(" : ", false, 0))
+		content_array_parsed.append([content_array_temp[row][0], str2var(content_array_temp[row][1]), str2var(content_array_temp[row][2])])
 	return content_array_parsed
 
 
@@ -71,7 +72,7 @@ func _correct_name(input):
 func _on_SaveButton_pressed():
 	var winner_name = $NameInput/TextEdit.text
 	winner_name = _correct_name(winner_name)
-	winners.append([winner_name, score])
+	winners.append([winner_name, score, advance])
 	winners = _sort_array(winners)
 	_save_winners(winners)
 	winners = _load_winners()
@@ -79,21 +80,21 @@ func _on_SaveButton_pressed():
 
 
 func _sort_array(input_array):
-	var proxy_array = [0]
+	var temp_array = [0]
 	var sorted_array = []
 	var size	
 	if input_array.size() < 10: # limit output size if necessary
 		size = input_array.size()
 	else:
 		size = 10
-	proxy_array.resize(input_array.size())
+	temp_array.resize(input_array.size())
 	for row in range(input_array.size()):
-		proxy_array[row] = input_array[row][1]	
+		temp_array[row] = input_array[row][2]	
 	for i in range(input_array.size()):
-		for row in range(proxy_array.size()):
-			if (proxy_array[row] == proxy_array.min()):
-				sorted_array.append([input_array[row][0],var2str(input_array[row][1])])
-				proxy_array[row] = 9999
+		for row in range(temp_array.size()):
+			if (temp_array[row] == temp_array.min()):
+				sorted_array.append([input_array[row][0],var2str(input_array[row][1]),var2str(input_array[row][2])])
+				temp_array[row] = 9999
 	sorted_array.resize(size)
 	return sorted_array
 
@@ -105,7 +106,7 @@ func _load_winners():
 	$HallPanel/ScoreLabel.text = ""
 	for row in winners.size():
 		$HallPanel/NameLabel.add_text(winners[row][0] + "\n")
-		$HallPanel/ScoreLabel.append_bbcode("[right]" + var2str(winners[row][1]) + "[/right]")
+		$HallPanel/ScoreLabel.append_bbcode("[right] S: " + var2str(winners[row][1]) + " A: " + var2str(winners[row][2]) + "[/right]")
 	return winners
 
 
@@ -118,7 +119,7 @@ func _save_winners(input_array):
 	else:
 		size = 10
 	for row in range(size):
-		content += input_array[row][0] + " : {str}".format({"str": input_array[row][1]})
+		content += input_array[row][0] + " : {str} : {str2}".format({"str": input_array[row][1], "str2": input_array[row][2]})
 		if row != size - 1:
 			content += "\n"
 	file.open("res://save_game.dat", File.WRITE)

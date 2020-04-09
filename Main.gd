@@ -134,7 +134,6 @@ func _move_completed():
 				count += 1
 	if count == 9:
 		get_node("/root/Global").win_text = "Blue win!"
-		print (game_matrix)
 		_game_over()
 	
 	count = 0
@@ -144,7 +143,6 @@ func _move_completed():
 				count += 1
 	if count == 9:
 		get_node("/root/Global").win_text = "Red win!"
-		print (game_matrix)
 		_game_over()
 	score += 1
 
@@ -152,6 +150,7 @@ func _move_completed():
 func _game_over():
 	get_tree().change_scene("Menu.tscn")
 	get_node("/root/Global").score = score
+	get_node("/root/Global").advance = get_node("/root/Global").calculate_advance(game_matrix)
 
 # warning-ignore:unused_argument
 # warning-ignore:unused_argument
