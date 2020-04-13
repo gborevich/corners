@@ -38,9 +38,9 @@ func calculate_advance(input_matrix):
 	var count = 0 
 		
 	if score % 2 == 1: # if blue win
-		matrix = invert_matrix(input_matrix)
+		matrix = rotate_matrix(input_matrix)
 	else:
-		matrix = input_matrix
+		matrix = invert_matrix(input_matrix)
 
 	advance = 0
 	while count == 0:
@@ -138,18 +138,39 @@ func move_metric(cell_from, cell_to): # metric to select moves
 	var move_metric = 1
 	var cell_weight = 0
 	var target_cell = Vector2(0,0)
-	if cell_from > Vector2(2,2): # other metric for figures in the corner
+	if cell_from.x > 2 or cell_from.y > 2: # other metric for figures in the corner
 		for x in 3:
 			for y in 3:
 				if matrix[x][y] == 0:
-					if cell_weight < 1 / (x * (y + 0.01) + 1):
-						cell_weight = 1 / (x * (y + 0.01) + 1)
+					if cell_weight < 1.0 / (x + y + 1.0):
+						if x > y: # to add weight assymetrically to cells in closer to figure sector
+							cell_weight = 1.0 / (x / 2.0 + y + 1.0)
+						else:
+							cell_weight = 1.0 / (x + y / 2.0 + 1.0)
 						target_cell = Vector2(x,y)
 		move_metric = (cell_from - target_cell).length() - (cell_to - target_cell).length()
 	else:
 		move_metric = cell_from.length() - cell_to.length()
 	
 	return move_metric
+
+func rotate_matrix(input_matrix):
+	var rotated_matrix = [
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0],] 
+	
+	for x in 8:
+		for y in 8:
+			rotated_matrix[x][y] = input_matrix[7-x][7-y]
+		
+	return rotated_matrix
+
 
 func invert_matrix(input_matrix):
 	var inverted_matrix = [
@@ -164,6 +185,9 @@ func invert_matrix(input_matrix):
 	
 	for x in 8:
 		for y in 8:
-			inverted_matrix[x][y] = input_matrix[7-x][7-y]
+			if input_matrix[x][y] == 1:
+				inverted_matrix[x][y] = 2
+			elif input_matrix[x][y] == 2:
+				inverted_matrix[x][y] = 1
 		
 	return inverted_matrix
